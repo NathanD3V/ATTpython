@@ -8,7 +8,7 @@ def conectar_banco():
         return mysql.connector.connect(
             host="localhost",
             user="root",
-            password="12345",
+            password="sua senha",
             database="bancopy"
         )
     except mysql.connector.Error as err:
@@ -47,16 +47,16 @@ def login():
 
 def open_main_window(username, role):
     main_window = tk.Tk()
-    main_window.title("Gerenciador de Resíduos")
+    main_window.title("Gerenciador da ideonella sakaiensis")
     main_window.geometry("400x300")
     main_window.configure(bg="#91bd8f")
 
     def insert_data():
-        residuos = entry_residuo.get().strip().lower()
-        estado = entry_estado.get().strip().capitalize()
+        crioprotetores = entry_crioprotetor.get().strip().lower()
+        temperatura = entry_temperatura.get().strip().capitalize()
         quantidade = entry_quantidade.get()
 
-        if not (residuos and estado and quantidade.isdigit()):
+        if not (crioprotetores and temperatura and quantidade.isdigit()):
             messagebox.showwarning("Aviso", "Por favor, preencha todos os campos corretamente.")
             return
 
@@ -67,8 +67,8 @@ def open_main_window(username, role):
 
         try:
             cursor = conexao.cursor()
-            sql = "INSERT INTO tb_residuos (residuos, estado, quantidade, usuario_id) VALUES (%s, %s, %s, (SELECT id FROM tb_usuarios WHERE username = %s))"
-            valores = (residuos, estado, quantidade, username)
+            sql = "INSERT INTO tb_crioprotetores (crioprotetores, temperatura, quantidade, usuario_id) VALUES (%s, %s, %s, (SELECT id FROM tb_usuarios WHERE username = %s))"
+            valores = (crioprotetores, temperatura, quantidade, username)
             cursor.execute(sql, valores)
             conexao.commit()
             messagebox.showinfo("Sucesso", "Dados inseridos com sucesso!")
@@ -81,14 +81,14 @@ def open_main_window(username, role):
         clear_entries()
 
     def delete_data():
-        residuos = entry_residuo.get().strip().lower()
+        crioprotetores = entry_crioprotetor.get().strip().lower()
 
         if role != 'admin':
-            messagebox.showwarning("Aviso", "Somente o engenheiro chefe pode remover resíduos.")
+            messagebox.showwarning("Aviso", "Somente o engenheiro chefe pode remover crioprotetores.")
             return
 
-        if not residuos:
-            messagebox.showwarning("Aviso", "Digite o nome do resíduo a ser removido.")
+        if not crioprotetores:
+            messagebox.showwarning("Aviso", "Digite o nome do crioprotetor a ser removido.")
             return
 
         conexao = conectar_banco()
@@ -97,15 +97,15 @@ def open_main_window(username, role):
 
         try:
             cursor = conexao.cursor()
-            sql = "DELETE FROM tb_residuos WHERE residuos = %s"
-            valores = (residuos,)
+            sql = "DELETE FROM tb_crioprotetores WHERE crioprotetores = %s"
+            valores = (crioprotetores,)
             cursor.execute(sql, valores)
             conexao.commit()
 
             if cursor.rowcount > 0:
-                messagebox.showinfo("Sucesso", f"Dados deletados com sucesso para {residuos}")
+                messagebox.showinfo("Sucesso", f"Dados deletados com sucesso para {crioprotetores}")
             else:
-                messagebox.showwarning("Aviso", f"Nenhum resíduo encontrado com o nome {residuos}")
+                messagebox.showwarning("Aviso", f"Nenhum crioprotetor encontrado com o nome {crioprotetores}")
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao deletar dados: {str(e)}")
         finally:
@@ -121,10 +121,10 @@ def open_main_window(username, role):
 
         try:
             cursor = conexao.cursor()
-            cursor.execute("SELECT * FROM tb_residuos")
+            cursor.execute("SELECT * FROM tb_crioprotetores")
             registros = cursor.fetchall()
 
-            dados = "\n".join([f"ID: {row[0]}, Resíduo: {row[1]}, Estado: {row[2]}, Quantidade: {row[3]}" for row in registros])
+            dados = "\n".join([f"ID: {row[0]}, Crioprotetor: {row[1]}, Temperatura: {row[2]}, Quantidade: {row[3]}" for row in registros])
             if dados:
                 messagebox.showinfo("Dados", dados)
             else:
@@ -136,19 +136,19 @@ def open_main_window(username, role):
             conexao.close()
 
     def clear_entries():
-        entry_residuo.delete(0, tk.END)
-        entry_estado.delete(0, tk.END)
+        entry_crioprotetor.delete(0, tk.END)
+        entry_temperatura.delete(0, tk.END)
         entry_quantidade.delete(0, tk.END)
 
     label_style = {"bg": "#14341f", "fg": "white", "font": ("Helvetica", 10, "bold")}
 
-    tk.Label(main_window, text="Resíduo:", **label_style).grid(row=0, column=0, pady=5, padx=10, sticky="e")
-    entry_residuo = tk.Entry(main_window, font=("Helvetica", 10))
-    entry_residuo.grid(row=0, column=1, pady=5, padx=10, sticky="w")
+    tk.Label(main_window, text="Crioprotetor:", **label_style).grid(row=0, column=0, pady=5, padx=10, sticky="e")
+    entry_crioprotetor = tk.Entry(main_window, font=("Helvetica", 10))
+    entry_crioprotetor.grid(row=0, column=1, pady=5, padx=10, sticky="w")
 
-    tk.Label(main_window, text="Estado:", **label_style).grid(row=1, column=0, pady=5, padx=10, sticky="e")
-    entry_estado = tk.Entry(main_window, font=("Helvetica", 10))
-    entry_estado.grid(row=1, column=1, pady=5, padx=10, sticky="w")
+    tk.Label(main_window, text="Temperatura:", **label_style).grid(row=1, column=0, pady=5, padx=10, sticky="e")
+    entry_temperatura = tk.Entry(main_window, font=("Helvetica", 10))
+    entry_temperatura.grid(row=1, column=1, pady=5, padx=10, sticky="w")
 
     tk.Label(main_window, text="Quantidade:", **label_style).grid(row=2, column=0, pady=5, padx=10, sticky="e")
     entry_quantidade = tk.Entry(main_window, font=("Helvetica", 10))
@@ -162,10 +162,10 @@ def open_main_window(username, role):
                     font=("Helvetica", 10, "bold"),
                     padding=5)
 
-    ttk.Button(main_window, text="Adicionar Resíduo", command=insert_data).grid(row=3, column=0, columnspan=2, pady=5, padx=10, sticky="n")
+    ttk.Button(main_window, text="Adicionar bactéria", command=insert_data).grid(row=3, column=0, columnspan=2, pady=5, padx=10, sticky="n")
 
     if role == 'admin':
-        ttk.Button(main_window, text="Remover Resíduo", command=delete_data).grid(row=4, column=0, columnspan=2, pady=5, padx=10, sticky="n")
+        ttk.Button(main_window, text="Remover bactéria", command=delete_data).grid(row=4, column=0, columnspan=2, pady=5, padx=10, sticky="n")
     
     ttk.Button(main_window, text="Visualizar Status", command=view_data).grid(row=5, column=0, columnspan=2, pady=5, padx=10, sticky="n")
     ttk.Button(main_window, text="Sair", command=main_window.quit).grid(row=6, column=0, columnspan=2, pady=5, padx=10, sticky="n")
