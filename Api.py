@@ -8,7 +8,7 @@ def conectar_banco():
         return mysql.connector.connect(
             host="localhost",
             user="root",
-            password="sua senha",
+            password="Sua senha",
             database="bancopy"
         )
     except mysql.connector.Error as err:
@@ -44,6 +44,62 @@ def login():
     finally:
         cursor.close()
         conexao.close()
+
+def open_third_window():
+    third_window = tk.Toplevel()
+    third_window.title("Registrar Novo Funcionário")
+    third_window.geometry("400x300")
+    third_window.configure(bg="#91bd8f")
+
+    def add_employee():
+        new_username = entry_new_username.get().strip()
+        new_password = entry_new_password.get().strip()
+        new_role = entry_new_role.get().strip().lower()
+
+        if not (new_username and new_password and new_role):
+            messagebox.showwarning("Aviso", "Por favor, preencha todos os campos.")
+            return
+
+        conexao = conectar_banco()
+        if conexao is None:
+            return
+
+        try:
+            cursor = conexao.cursor()
+            sql = "INSERT INTO tb_usuarios (username, senha, role) VALUES (%s, %s, %s)"
+            cursor.execute(sql, (new_username, new_password, new_role))
+            conexao.commit()
+            messagebox.showinfo("Sucesso", f"Funcionário {new_username} registrado com sucesso!")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao registrar funcionário: {str(e)}")
+        finally:
+            cursor.close()
+            conexao.close()
+
+        entry_new_username.delete(0, tk.END)
+        entry_new_password.delete(0, tk.END)
+        entry_new_role.delete(0, tk.END)
+
+    label_style = {"bg": "#14341f", "fg": "white", "font": ("Helvetica", 10, "bold")}
+
+    tk.Label(third_window, text="Nome de Usuário:", **label_style).grid(row=0, column=0, pady=10, padx=10, sticky="e")
+    entry_new_username = tk.Entry(third_window, font=("Helvetica", 10))
+    entry_new_username.grid(row=0, column=1, pady=10, padx=10, sticky="w")
+
+    tk.Label(third_window, text="Senha:", **label_style).grid(row=1, column=0, pady=10, padx=10, sticky="e")
+    entry_new_password = tk.Entry(third_window, font=("Helvetica", 10), show='*')
+    entry_new_password.grid(row=1, column=1, pady=10, padx=10, sticky="w")
+
+    tk.Label(third_window, text="Função (ex: admin, user):", **label_style).grid(row=2, column=0, pady=10, padx=10, sticky="e")
+    entry_new_role = tk.Entry(third_window, font=("Helvetica", 10))
+    entry_new_role.grid(row=2, column=1, pady=10, padx=10, sticky="w")
+
+    ttk.Button(third_window, text="Adicionar Funcionário", command=add_employee).grid(row=3, column=0, columnspan=2, pady=20)
+    ttk.Button(third_window, text="Sair", command=third_window.quit).grid(row=7, column=0, columnspan=2, pady=5, padx=10, sticky="n")
+    ttk.Button(third_window, text="Voltar", command=third_window.destroy).grid(row=4, column=0, columnspan=2, pady=10)
+
+    third_window.grid_columnconfigure(0, weight=1)
+    third_window.grid_columnconfigure(1, weight=1)
 
 def open_main_window(username, role):
     main_window = tk.Tk()
@@ -82,14 +138,6 @@ def open_main_window(username, role):
 
     def delete_data():
         crioprotetores = entry_crioprotetor.get().strip().lower()
-
-        if role != 'admin':
-            messagebox.showwarning("Aviso", "Somente o engenheiro chefe pode remover crioprotetores.")
-            return
-
-        if not crioprotetores:
-            messagebox.showwarning("Aviso", "Digite o nome do crioprotetor a ser removido.")
-            return
 
         conexao = conectar_banco()
         if conexao is None:
@@ -168,8 +216,9 @@ def open_main_window(username, role):
         ttk.Button(main_window, text="Remover bactéria", command=delete_data).grid(row=4, column=0, columnspan=2, pady=5, padx=10, sticky="n")
     
     ttk.Button(main_window, text="Visualizar Status", command=view_data).grid(row=5, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-    ttk.Button(main_window, text="Sair", command=main_window.quit).grid(row=6, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-
+    ttk.Button(main_window, text="Registro", command=open_third_window).grid(row=6, column=0, columnspan=2, pady=5, padx=10, sticky="n")
+    ttk.Button(main_window, text="Sair", command=main_window.quit).grid(row=7, column=0, columnspan=2, pady=5, padx=10, sticky="n")
+    
     main_window.grid_columnconfigure(0, weight=1)
     main_window.grid_columnconfigure(1, weight=1)
 
