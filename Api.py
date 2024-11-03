@@ -8,7 +8,7 @@ def conectar_banco():
         return mysql.connector.connect(
             host="localhost",
             user="root",
-            password="Sua senha",
+            password="12345",
             database="bancopy"
         )
     except mysql.connector.Error as err:
@@ -213,10 +213,11 @@ def open_main_window(username, role):
     ttk.Button(main_window, text="Adicionar bactéria", command=insert_data).grid(row=3, column=0, columnspan=2, pady=5, padx=10, sticky="n")
 
     if role == 'admin':
-        ttk.Button(main_window, text="Remover bactéria", command=delete_data).grid(row=4, column=0, columnspan=2, pady=5, padx=10, sticky="n")
+        ttk.Button(main_window, text="Registro", command=open_third_window).grid(row=6, column=0, columnspan=2, pady=5, padx=10, sticky="n")
+        
     
     ttk.Button(main_window, text="Visualizar Status", command=view_data).grid(row=5, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-    ttk.Button(main_window, text="Registro", command=open_third_window).grid(row=6, column=0, columnspan=2, pady=5, padx=10, sticky="n")
+    ttk.Button(main_window, text="Remover bactéria", command=delete_data).grid(row=4, column=0, columnspan=2, pady=5, padx=10, sticky="n")
     ttk.Button(main_window, text="Sair", command=main_window.quit).grid(row=7, column=0, columnspan=2, pady=5, padx=10, sticky="n")
     
     main_window.grid_columnconfigure(0, weight=1)
