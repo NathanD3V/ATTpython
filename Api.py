@@ -51,6 +51,54 @@ def open_third_window():
     third_window.geometry("400x300")
     third_window.configure(bg="#91bd8f")
 
+    def view_users():
+        conexao = conectar_banco()
+        if conexao is None:
+            return
+
+        try:
+            cursor = conexao.cursor()
+            cursor.execute("SELECT * FROM tb_usuarios")
+            registros = cursor.fetchall()
+
+            dados = "\n".join([f"ID: {row[0]}, Usuário: {row[1]}, Função: {row[3]}" for row in registros])
+            if dados:
+                messagebox.showinfo("Usuários Cadastrados", dados)
+            else:
+                messagebox.showinfo("Usuários Cadastrados", "Nenhum usuário encontrado.")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao buscar usuários: {str(e)}")
+        finally:
+            cursor.close()
+            conexao.close()
+
+    def delete_user():
+        username = entry_delete_username.get().strip()
+        if not username:
+            messagebox.showwarning("Aviso", "Por favor, insira um nome de usuário para deletar.")
+            return
+
+        conexao = conectar_banco()
+        if conexao is None:
+            return
+
+        try:
+            cursor = conexao.cursor()
+            cursor.execute("DELETE FROM tb_usuarios WHERE username = %s", (username,))
+            conexao.commit()
+
+            if cursor.rowcount > 0:
+                messagebox.showinfo("Sucesso", f"Usuário '{username}' deletado com sucesso!")
+            else:
+                messagebox.showwarning("Aviso", f"Usuário '{username}' não encontrado.")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao deletar usuário: {str(e)}")
+        finally:
+            cursor.close()
+            conexao.close()
+
+        entry_delete_username.delete(0, tk.END)
+
     def add_employee():
         new_username = entry_new_username.get().strip()
         new_password = entry_new_password.get().strip()
@@ -80,27 +128,42 @@ def open_third_window():
         entry_new_password.delete(0, tk.END)
         entry_new_role.delete(0, tk.END)
 
-    label_style = {"bg": "#14341f", "fg": "white", "font": ("Helvetica", 10, "bold")}
+    label_style = {
+        "bg": "#a2d5ab",
+        "fg": "#333333",
+        "font": ("Helvetica", 10, "bold")
+    }
 
-    tk.Label(third_window, text="Nome de Usuário:", **label_style).grid(row=0, column=0, pady=10, padx=10, sticky="e")
+    tk.Label(third_window, text="Nome de Usuário:", **label_style).grid(row=0, column=0, pady=5, padx=10, sticky="e")
     entry_new_username = tk.Entry(third_window, font=("Helvetica", 10))
-    entry_new_username.grid(row=0, column=1, pady=10, padx=10, sticky="w")
+    entry_new_username.grid(row=0, column=1, pady=5, padx=10, sticky="w")
 
-    tk.Label(third_window, text="Senha:", **label_style).grid(row=1, column=0, pady=10, padx=10, sticky="e")
+    tk.Label(third_window, text="Senha:", **label_style).grid(row=1, column=0, pady=5, padx=10, sticky="e")
     entry_new_password = tk.Entry(third_window, font=("Helvetica", 10), show='*')
-    entry_new_password.grid(row=1, column=1, pady=10, padx=10, sticky="w")
+    entry_new_password.grid(row=1, column=1, pady=5, padx=10, sticky="w")
 
-    tk.Label(third_window, text="Função (ex: admin, user):", **label_style).grid(row=2, column=0, pady=10, padx=10, sticky="e")
+    tk.Label(third_window, text="Função (ex: admin, user):", **label_style).grid(row=2, column=0, pady=5, padx=10, sticky="e")
     entry_new_role = tk.Entry(third_window, font=("Helvetica", 10))
-    entry_new_role.grid(row=2, column=1, pady=10, padx=10, sticky="w")
+    entry_new_role.grid(row=2, column=1, pady=5, padx=10, sticky="w")
 
-    ttk.Button(third_window, text="Adicionar Funcionário", command=add_employee).grid(row=3, column=0, columnspan=2, pady=20)
-    ttk.Button(third_window, text="Sair", command=third_window.quit).grid(row=7, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-    ttk.Button(third_window, text="Voltar", command=third_window.destroy).grid(row=4, column=0, columnspan=2, pady=10)
+    ttk.Button(third_window, text="Adicionar Funcionário", command=add_employee).grid(row=3, column=0, columnspan=2, pady=10)
+
+    ttk.Button(third_window, text="Visualizar Usuários", command=view_users).grid(row=4, column=0, columnspan=2, pady=5)
+    ttk.Button(third_window, text="Deletar Usuário", command=delete_user).grid(row=6, column=0, columnspan=2, pady=5)
+
+    tk.Label(third_window, text="Deletar Usuário:", **label_style).grid(row=5, column=0, pady=5, padx=10, sticky="e")
+    entry_delete_username = tk.Entry(third_window, font=("Helvetica", 10))
+    entry_delete_username.grid(row=5, column=1, pady=5, padx=10, sticky="w")
+
+    ttk.Button(third_window, text="Voltar", command=third_window.destroy).grid(row=7, column=0, pady=10)
+    ttk.Button(third_window, text="Sair", command=third_window.quit).grid(row=7, column=1, pady=10)
 
     third_window.grid_columnconfigure(0, weight=1)
     third_window.grid_columnconfigure(1, weight=1)
 
+    third_window.grid_columnconfigure(0, weight=1)
+    third_window.grid_columnconfigure(1, weight=1)
+    
 def open_main_window(username, role):
     main_window = tk.Tk()
     main_window.title("Gerenciador da ideonella sakaiensis")
@@ -188,8 +251,11 @@ def open_main_window(username, role):
         entry_temperatura.delete(0, tk.END)
         entry_quantidade.delete(0, tk.END)
 
-    label_style = {"bg": "#14341f", "fg": "white", "font": ("Helvetica", 10, "bold")}
-
+    label_style = {
+        "bg": "#a2d5ab",
+        "fg": "#333333",
+        "font": ("Helvetica", 10, "bold")
+    }
     tk.Label(main_window, text="Crioprotetor:", **label_style).grid(row=0, column=0, pady=5, padx=10, sticky="e")
     entry_crioprotetor = tk.Entry(main_window, font=("Helvetica", 10))
     entry_crioprotetor.grid(row=0, column=1, pady=5, padx=10, sticky="w")
