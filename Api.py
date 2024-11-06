@@ -48,7 +48,7 @@ def login():
 def open_third_window():
     third_window = tk.Toplevel()
     third_window.title("Registrar Novo Funcionário")
-    third_window.geometry("400x300")
+    third_window.geometry("600x400")
     third_window.configure(bg="#91bd8f")
 
     def view_users():
@@ -167,7 +167,7 @@ def open_third_window():
 def open_main_window(username, role):
     main_window = tk.Tk()
     main_window.title("Gerenciador da ideonella sakaiensis")
-    main_window.geometry("400x300")
+    main_window.geometry("600x400")
     main_window.configure(bg="#91bd8f")
 
     def insert_data():
@@ -256,6 +256,7 @@ def open_main_window(username, role):
         "fg": "#333333",
         "font": ("Helvetica", 10, "bold")
     }
+
     tk.Label(main_window, text="Crioprotetor:", **label_style).grid(row=0, column=0, pady=5, padx=10, sticky="e")
     entry_crioprotetor = tk.Entry(main_window, font=("Helvetica", 10))
     entry_crioprotetor.grid(row=0, column=1, pady=5, padx=10, sticky="w")
@@ -280,8 +281,6 @@ def open_main_window(username, role):
 
     if role == 'admin':
         ttk.Button(main_window, text="Registro", command=open_third_window).grid(row=6, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-        
-    
     ttk.Button(main_window, text="Visualizar Status", command=view_data).grid(row=5, column=0, columnspan=2, pady=5, padx=10, sticky="n")
     ttk.Button(main_window, text="Remover bactéria", command=delete_data).grid(row=4, column=0, columnspan=2, pady=5, padx=10, sticky="n")
     ttk.Button(main_window, text="Sair", command=main_window.quit).grid(row=7, column=0, columnspan=2, pady=5, padx=10, sticky="n")
@@ -296,31 +295,32 @@ root.title("Login")
 root.geometry("400x300")
 root.configure(bg="#91bd8f")
 
-label_username = tk.Label(root, text="Nome de Usuário:", font=("Helvetica", 12, "bold"), bg="#30833f", fg="white")
-label_username.grid(row=0, column=0, pady=20, padx=20)
+label_style = {
+    "bg": "#a2d5ab",
+    "fg": "#333333",
+    "font": ("Helvetica", 10, "bold")
+}
 
-entry_username = tk.Entry(root, font=("Helvetica", 12))
-entry_username.grid(row=0, column=1, pady=10, padx=20)
+tk.Label(root, text="Nome de Usuário:", **label_style).grid(row=0, column=0, pady=20, padx=20, sticky="e")
+entry_username = tk.Entry(root, font=("Helvetica", 10))
+entry_username.grid(row=0, column=1, pady=10, padx=20, sticky="w")
 
-label_senha = tk.Label(root, text="Senha:", font=("Helvetica", 12, "bold"), bg="#30833f", fg="white")
-label_senha.grid(row=1, column=0, pady=20, padx=20)
-
-entry_senha = tk.Entry(root, font=("Helvetica", 12), show='*')
-entry_senha.grid(row=1, column=1, pady=10, padx=20)
+tk.Label(root, text="Senha:", **label_style).grid(row=1, column=0, pady=20, padx=20, sticky="e")
+entry_senha = tk.Entry(root, font=("Helvetica", 10), show='*')
+entry_senha.grid(row=1, column=1, pady=10, padx=20, sticky="w")
 
 style = ttk.Style()
 style.theme_use("clam")
 style.configure("TButton",
-                background="#4CAF50",
+                background="#30833f",
                 foreground="white",
-                font=("Helvetica", 12, "bold"),
-                padding=10)
-
+                font=("Helvetica", 10, "bold"),
+                padding=5)
 style.map("TButton",
-          background=[("active", "#45a049")],
-          foreground=[("active", "white")])
+        background=[("active", "#45a049")],
+        foreground=[("active", "white")])
 
-btn_login = ttk.Button(root, text="Login", command=login)
+btn_login = ttk.Button(root, text="Entrar", command=login)
 btn_login.grid(row=2, column=0, columnspan=2, pady=20)
 
 root.grid_columnconfigure(0, weight=1)
