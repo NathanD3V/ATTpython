@@ -8,7 +8,7 @@ def conectar_banco():
         return mysql.connector.connect(
             host="localhost",
             user="root",
-            password="12345",
+            password="Dimensional.12",
             database="bancopy"
         )
     except mysql.connector.Error as err:
@@ -170,6 +170,23 @@ def open_main_window(username, role):
     main_window.geometry("600x400")
     main_window.configure(bg="#91bd8f")
 
+    def update_capacity():
+        conexao = conectar_banco()
+        if conexao is None:
+            return
+
+        try:
+            cursor = conexao.cursor()
+            cursor.execute("SELECT COUNT(*) FROM tb_crioprotetores")
+            count = cursor.fetchone()[0]
+            progress['value'] = min(count, 100)  # Limite de 100
+            label_capacity.config(text=f"Capacidade: {count}/100")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao buscar dados: {str(e)}")
+        finally:
+            cursor.close()
+            conexao.close()
+
     def insert_data():
         crioprotetores = entry_crioprotetor.get().strip().lower()
         temperatura = entry_temperatura.get().strip().capitalize()
@@ -257,15 +274,15 @@ def open_main_window(username, role):
         "font": ("Helvetica", 10, "bold")
     }
 
-    tk.Label(main_window, text="Crioprotetor:", **label_style).grid(row=0, column=0, pady=5, padx=10, sticky="e")
+    tk.Label(main_window, text="Crioprotetor:", bg="#a2d5ab", font=("Helvetica", 10, "bold")).grid(row=0, column=0, pady=5, padx=10, sticky="e")
     entry_crioprotetor = tk.Entry(main_window, font=("Helvetica", 10))
     entry_crioprotetor.grid(row=0, column=1, pady=5, padx=10, sticky="w")
 
-    tk.Label(main_window, text="Temperatura:", **label_style).grid(row=1, column=0, pady=5, padx=10, sticky="e")
+    tk.Label(main_window, text="Temperatura:", bg="#a2d5ab", font=("Helvetica", 10, "bold")).grid(row=1, column=0, pady=5, padx=10, sticky="e")
     entry_temperatura = tk.Entry(main_window, font=("Helvetica", 10))
     entry_temperatura.grid(row=1, column=1, pady=5, padx=10, sticky="w")
 
-    tk.Label(main_window, text="Quantidade:", **label_style).grid(row=2, column=0, pady=5, padx=10, sticky="e")
+    tk.Label(main_window, text="Quantidade:", bg="#a2d5ab", font=("Helvetica", 10, "bold")).grid(row=2, column=0, pady=5, padx=10, sticky="e")
     entry_quantidade = tk.Entry(main_window, font=("Helvetica", 10))
     entry_quantidade.grid(row=2, column=1, pady=5, padx=10, sticky="w")
 
@@ -277,14 +294,21 @@ def open_main_window(username, role):
                     font=("Helvetica", 10, "bold"),
                     padding=5)
 
-    ttk.Button(main_window, text="Adicionar bactéria", command=insert_data).grid(row=3, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-
+    ttk.Button(main_window, text="Adicionar bactéria", command=insert_data).grid(row=3, column=0, columnspan=2, pady=5)
+    ttk.Button(main_window, text="Visualizar Status", command=view_data).grid(row=5, column=0, columnspan=2, pady=5)
+    ttk.Button(main_window, text="Remover bactéria", command=delete_data).grid(row=4, column=0, columnspan=2, pady=5)
     if role == 'admin':
-        ttk.Button(main_window, text="Registro", command=open_third_window).grid(row=6, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-    ttk.Button(main_window, text="Visualizar Status", command=view_data).grid(row=5, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-    ttk.Button(main_window, text="Remover bactéria", command=delete_data).grid(row=4, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-    ttk.Button(main_window, text="Sair", command=main_window.quit).grid(row=7, column=0, columnspan=2, pady=5, padx=10, sticky="n")
-    
+        ttk.Button(main_window, text="Registro", command=open_third_window).grid(row=6, column=0, columnspan=2, pady=5)
+    ttk.Button(main_window, text="Sair", command=main_window.quit).grid(row=7, column=0, columnspan=2, pady=5)
+
+    label_capacity = tk.Label(main_window, text="Capacidade: 0/100", bg="#91bd8f", font=("Helvetica", 10, "bold"))
+    label_capacity.grid(row=0, column=2, padx=20, pady=5, sticky="w")
+
+    progress = ttk.Progressbar(main_window, orient="vertical", length=200, mode="determinate", maximum=100)
+    progress.grid(row=1, column=2, rowspan=6, padx=20)
+
+    update_capacity()
+
     main_window.grid_columnconfigure(0, weight=1)
     main_window.grid_columnconfigure(1, weight=1)
 
