@@ -2,13 +2,15 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import mysql.connector
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 def conectar_banco():
     try:
         return mysql.connector.connect(
             host="localhost",
             user="root",
-            password="Dimensional.12",
+            password="12345",
             database="bancopy"
         )
     except mysql.connector.Error as err:
@@ -170,24 +172,38 @@ def open_main_window(username, role):
     main_window.geometry("600x400")
     main_window.configure(bg="#91bd8f")
 
-    def update_capacity():
+    def update_capacity_chart():
+        """Atualiza o gráfico de capacidade do banco de dados."""
         conexao = conectar_banco()
         if conexao is None:
             return
 
         try:
             cursor = conexao.cursor()
-            cursor.execute("SELECT COUNT(*) FROM tb_crioprotetores")
-            count = cursor.fetchone()[0]
-            progress['value'] = min(count, 100)  # Limite de 100
-            label_capacity.config(text=f"Capacidade: {count}/100")
-        except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao buscar dados: {str(e)}")
-        finally:
+            cursor.execute("SELECT SUM(quantidade) FROM tb_crioprotetores")
+            total = cursor.fetchone()[0] or 0
+
             cursor.close()
             conexao.close()
 
+            ocupado = min(total, 1000)
+            livre = max(0, 1000 - ocupado)
+
+            ax.clear()
+            ax.pie(
+                [ocupado, livre],
+                labels=["Ocupado", "Disponível"],
+                autopct='%1.1f%%',
+                colors=["#ff9999", "#99ff99"],
+                startangle=90,
+            )
+            ax.set_title("Capacidade do Biodigestor (Máx: 1000)")
+            canvas.draw()
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao buscar dados: {str(e)}")
+
     def insert_data():
+        """Insere dados no banco, respeitando o limite máximo de 1000 unidades."""
         crioprotetores = entry_crioprotetor.get().strip().lower()
         temperatura = entry_temperatura.get().strip().capitalize()
         quantidade = entry_quantidade.get()
@@ -203,11 +219,20 @@ def open_main_window(username, role):
 
         try:
             cursor = conexao.cursor()
+            cursor.execute("SELECT SUM(quantidade) FROM tb_crioprotetores")
+            total_atual = cursor.fetchone()[0] or 0
+
+            if total_atual + quantidade > 1000:
+                messagebox.showwarning("Aviso", "A quantidade excederia o limite máximo de 1000 unidades no biodigestor.")
+                return
+
             sql = "INSERT INTO tb_crioprotetores (crioprotetores, temperatura, quantidade, usuario_id) VALUES (%s, %s, %s, (SELECT id FROM tb_usuarios WHERE username = %s))"
             valores = (crioprotetores, temperatura, quantidade, username)
             cursor.execute(sql, valores)
             conexao.commit()
             messagebox.showinfo("Sucesso", "Dados inseridos com sucesso!")
+
+            update_capacity_chart()
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao inserir dados: {str(e)}")
         finally:
@@ -294,6 +319,18 @@ def open_main_window(username, role):
                     font=("Helvetica", 10, "bold"),
                     padding=5)
 
+    tk.Label(main_window, text="Crioprotetor:", bg="#a2d5ab", font=("Helvetica", 10, "bold")).grid(row=0, column=0, pady=5, padx=10, sticky="e")
+    entry_crioprotetor = tk.Entry(main_window, font=("Helvetica", 10))
+    entry_crioprotetor.grid(row=0, column=1, pady=5, padx=10, sticky="w")
+
+    tk.Label(main_window, text="Temperatura:", bg="#a2d5ab", font=("Helvetica", 10, "bold")).grid(row=1, column=0, pady=5, padx=10, sticky="e")
+    entry_temperatura = tk.Entry(main_window, font=("Helvetica", 10))
+    entry_temperatura.grid(row=1, column=1, pady=5, padx=10, sticky="w")
+
+    tk.Label(main_window, text="Quantidade:", bg="#a2d5ab", font=("Helvetica", 10, "bold")).grid(row=2, column=0, pady=5, padx=10, sticky="e")
+    entry_quantidade = tk.Entry(main_window, font=("Helvetica", 10))
+    entry_quantidade.grid(row=2, column=1, pady=5, padx=10, sticky="w")
+
     ttk.Button(main_window, text="Adicionar bactéria", command=insert_data).grid(row=3, column=0, columnspan=2, pady=5)
     ttk.Button(main_window, text="Visualizar Status", command=view_data).grid(row=5, column=0, columnspan=2, pady=5)
     ttk.Button(main_window, text="Remover bactéria", command=delete_data).grid(row=4, column=0, columnspan=2, pady=5)
@@ -301,16 +338,19 @@ def open_main_window(username, role):
         ttk.Button(main_window, text="Registro", command=open_third_window).grid(row=6, column=0, columnspan=2, pady=5)
     ttk.Button(main_window, text="Sair", command=main_window.quit).grid(row=7, column=0, columnspan=2, pady=5)
 
-    label_capacity = tk.Label(main_window, text="Capacidade: 0/100", bg="#91bd8f", font=("Helvetica", 10, "bold"))
-    label_capacity.grid(row=0, column=2, padx=20, pady=5, sticky="w")
+    # Gráfico de capacidade
+    fig = Figure(figsize=(3, 3), dpi=100)
+    ax = fig.add_subplot(111)
 
-    progress = ttk.Progressbar(main_window, orient="vertical", length=200, mode="determinate", maximum=100)
-    progress.grid(row=1, column=2, rowspan=6, padx=20)
+    canvas = FigureCanvasTkAgg(fig, main_window)
+    canvas.get_tk_widget().grid(row=0, column=2, rowspan=8, padx=20, pady=10)
 
-    update_capacity()
+    # Atualiza o gráfico ao abrir a janela
+    update_capacity_chart()
 
     main_window.grid_columnconfigure(0, weight=1)
     main_window.grid_columnconfigure(1, weight=1)
+    main_window.grid_columnconfigure(2, weight=1)
 
     main_window.mainloop()
 
