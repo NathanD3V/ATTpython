@@ -10,7 +10,7 @@ def conectar_banco():
         return mysql.connector.connect(
             host="localhost",
             user="root",
-            password="12345",
+            password="Dimensional.12",
             database="bancopy"
         )
     except mysql.connector.Error as err:
@@ -201,7 +201,7 @@ def open_main_window(username, role):
             canvas.draw()
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao buscar dados: {str(e)}")
-
+    
     def insert_data():
         """Insere dados no banco, respeitando o limite máximo de 1000 unidades."""
         crioprotetores = entry_crioprotetor.get().strip().lower()
@@ -233,6 +233,7 @@ def open_main_window(username, role):
             messagebox.showinfo("Sucesso", "Dados inseridos com sucesso!")
 
             update_capacity_chart()
+
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao inserir dados: {str(e)}")
         finally:
@@ -299,6 +300,7 @@ def open_main_window(username, role):
         "font": ("Helvetica", 10, "bold")
     }
 
+    ttk.Button(main_window, text="Atualizar Gráfico", command=update_capacity_chart).grid(row=8, column=2, pady=5)
     tk.Label(main_window, text="Crioprotetor:", bg="#a2d5ab", font=("Helvetica", 10, "bold")).grid(row=0, column=0, pady=5, padx=10, sticky="e")
     entry_crioprotetor = tk.Entry(main_window, font=("Helvetica", 10))
     entry_crioprotetor.grid(row=0, column=1, pady=5, padx=10, sticky="w")
@@ -344,6 +346,9 @@ def open_main_window(username, role):
 
     canvas = FigureCanvasTkAgg(fig, main_window)
     canvas.get_tk_widget().grid(row=0, column=2, rowspan=8, padx=20, pady=10)
+
+    # Botão para atualizar o gráfico
+    ttk.Button(main_window, text="Atualizar Gráfico", command=update_capacity_chart).grid(row=8, column=2, pady=5)
 
     # Atualiza o gráfico ao abrir a janela
     update_capacity_chart()
