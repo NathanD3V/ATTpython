@@ -1,7 +1,8 @@
-# ATTpython
+# Requerimentos para o codigo ser executavel além do python
  
-SQL: Criar a tabela
+MySQL: Criar a tabela/banco de dados
 
+1. Comandos:
 CREATE DATABASE bancopy;
 USE bancopy;
 
@@ -21,14 +22,22 @@ CREATE TABLE tb_crioprotetores (
     FOREIGN KEY (usuario_id) REFERENCES tb_usuarios(id)
 );
 
+2. Em seguida inserir dados de registro pelo MySQL
+
 -- Inserir dados para exemplo
 INSERT INTO tb_usuarios (username, senha, role) VALUES ('admin', '12345', 'admin');
 INSERT INTO tb_usuarios (username, senha, role) VALUES ('user1', '12345', 'user');
 
--- baixar o mysql connector 
+3. Baixar as dependencias para se executar:
+-- Interface gráfica
+pip install tk
 
+-- baixar o mysql connector 
 pip install mysql-connector-python
 
--- biblioteca do futuro grafico 
-
+-- biblioteca do grafico 
 pip install matplotlib
+
+
+4. Manter a senha "12345" ou mudar a senha no código para se executar o codigo 
+e ter acesso ao banco de dados
