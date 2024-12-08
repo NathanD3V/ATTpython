@@ -8,7 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 def conectar_banco():
     try:
         return mysql.connector.connect(
-            host="mysql://root:VHvYAqxlVbYqkioAUmuBMejOIDTvtPWb@junction.proxy.rlwy.net:13556/railwayt",
+            host="localhost",
             user="root",
             password="12345",
             database="bancopy"
